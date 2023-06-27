@@ -1,0 +1,16 @@
+
+version: "3"
+
+services:
+  mysql:
+    container_name: books-api
+    image: mysql:5.6
+    environment:
+      MYSQL_ROOT_PASSWORD: test-password
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+volumes:
+  dbdata:
