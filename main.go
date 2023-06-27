@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net/http"
+	"github.com/gin-gonic/gin"
 	"fmt"
   "os"
   "gorm.io/driver/mysql"
@@ -39,6 +41,10 @@ func main() {
 		return
 	}
 	DB = db
+
+	router := gin.Default()
+	router.POST("/books", postBooks)
+	router.Run("localhost:8080")  
 }
 
 func LoadEnv() {
@@ -48,3 +54,11 @@ func LoadEnv() {
 	}
 }
 
+func postBooks(c *gin.Context) {
+	var newBook Book
+	if err := c.BindJSON(&newBook); err != nil {
+		return
+	}
+	result := DB.Create(&newBook)
+	c.IndentedJSON(http.StatusCreated, result)
+}
