@@ -9,6 +9,8 @@ import (
   "gorm.io/gorm"
 	"log"
   "github.com/joho/godotenv"
+	"strings"
+	base64 "encoding/base64"
 )
 
 var DB *gorm.DB
@@ -43,7 +45,7 @@ func main() {
 	DB = db
 
 	router := gin.Default()
-	router.POST("/books", postBooks)
+	router.POST("/books", basicAuth(), postBooks)
 	router.Run("localhost:8080")  
 }
 
@@ -52,6 +54,35 @@ func LoadEnv() {
 	if err != nil {
 			log.Fatalf("unable to load .env file")
 	}
+}
+
+func basicAuth() gin.HandlerFunc {
+	API_USER_NAME := os.Getenv("BASIC_AUTH_USER_NAME")
+	API_PASSWORD := os.Getenv("BASIC_AUTH_PASSWORD")
+
+  return func(c *gin.Context) {
+    auth := strings.SplitN(c.Request.Header.Get("Authorization"), " ", 2)
+
+    if len(auth) != 2 || auth[0] != "Basic" {
+      respondWithError(401, "Unauthorized", c)
+      return
+    }
+    payload, _ := base64.StdEncoding.DecodeString(auth[1])
+    pair := strings.SplitN(string(payload), ":", 2)
+
+    if (pair[0] != API_USER_NAME || pair[1] != API_PASSWORD)   {
+      respondWithError(401, "Unauthorized", c)
+      return 
+    }
+
+    c.Next()
+  }
+}
+
+func respondWithError(code int, message string, c *gin.Context) {
+	resp := map[string]string{"error": message}
+	c.JSON(code, resp)
+	c.Abort()
 }
 
 func postBooks(c *gin.Context) {
