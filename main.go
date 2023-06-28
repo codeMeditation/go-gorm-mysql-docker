@@ -53,6 +53,7 @@ func main() {
 	DB = db
 
 	router := gin.Default()
+	router.GET("/books", getBooks)
 	router.POST("/books", basicAuth(), postBooks)
 	router.Run("localhost:8080")  
 }
@@ -91,6 +92,13 @@ func respondWithError(code int, message string, c *gin.Context) {
 	resp := map[string]string{"error": message}
 	c.JSON(code, resp)
 	c.Abort()
+}
+
+func getBooks(c *gin.Context) {
+	var books []Book
+  result := DB.Find(&books)
+	fmt.Println(result.RowsAffected)
+	c.IndentedJSON(http.StatusOK, books)
 }
 
 func postBooks(c *gin.Context) {
