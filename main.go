@@ -10,13 +10,21 @@ import (
 	"log"
   "github.com/joho/godotenv"
 	"strings"
+	"time"
 	base64 "encoding/base64"
 )
 
 var DB *gorm.DB
 
+type Model struct {
+  ID        uint           `gorm:"primaryKey"`
+  CreatedAt time.Time
+  UpdatedAt time.Time
+  DeletedAt gorm.DeletedAt `gorm:"index"`
+}
+
 type Book struct {
-	ID     string  `json:"id"`
+	Model
 	Title  string  `json:"title"`
 	Artist string  `json:"artist"`
 	Price  float64 `json:"price"`
